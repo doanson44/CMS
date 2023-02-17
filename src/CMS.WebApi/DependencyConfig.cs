@@ -27,7 +27,7 @@ namespace CMS.WebApi
                 .Where(c => c.Name.EndsWith("Services") || c.Name.EndsWith("Service"))
                 .AsPublicImplementedInterfaces();
 
-            services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, EFUnitOfWork>();
 
         }

@@ -113,9 +113,9 @@ namespace CMS.Infrastructure.Data
             context = null;
         }
 
-        public IRepository<T, TKey> Get<T, TKey>() where T : BaseEntity<TKey>, new()
+        public IRepository<T> Get<T>() where T : BaseEntity, new()
         {
-            return servicesProvider.GetRequiredService<IRepository<T, TKey>>();
+            return servicesProvider.GetRequiredService<IRepository<T>>();
         }
 
         [Conditional("DEBUG")]

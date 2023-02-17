@@ -17,19 +17,16 @@ namespace CMS.Core.Data.Entities
         DateTime? DeletedAt { get; set; }
     }
 
-    public abstract class BaseEntity<T> : IBaseEntity
+    public abstract class BaseEntity : IBaseEntity
     {
-        [Key]
-        public virtual T Id { get; set; }
+        [MaxLength(100)]
+        public virtual string CreatedBy { get; set; }
+        public virtual DateTime CreatedAt { get; set; }
 
         [MaxLength(100)]
-        public string CreatedBy { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public virtual string UpdatedBy { get; set; }
+        public virtual DateTime UpdatedAt { get; set; }
 
-        [MaxLength(100)]
-        public string UpdatedBy { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public DateTime? DeletedAt { get; set; }
+        public virtual DateTime? DeletedAt { get; set; }
     }
 }

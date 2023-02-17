@@ -19,7 +19,7 @@ using Z.EntityFramework.Plus;
 
 namespace CMS.Infrastructure.Data.Repositories
 {
-    public class Repository<T, TKey> : IRepository<T, TKey> where T : BaseEntity<TKey>, new()
+    public class Repository<T> : IRepository<T> where T : BaseEntity, new()
     {
         protected readonly ApplicationDbContext Context;
         private readonly DbSet<T> table;
@@ -198,7 +198,7 @@ namespace CMS.Infrastructure.Data.Repositories
             if (updateProperties?.Count > 0)
             {
                 // entity must be attached before update any properties
-                table.AttachIfNeed<T, TKey>(updating, Context);
+                table.AttachIfNeed<T>(updating, Context);
 
                 foreach (var p in updateProperties)
                 {
@@ -287,14 +287,21 @@ namespace CMS.Infrastructure.Data.Repositories
             return ApplySpecification(spec, includeProperties).Select(selector).ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(TKey id, string[] includeProperties = null)
+        public async Task<T> GetByIdAsync(object id, string[] includeProperties = null)
         {
+            var model = await table.FindAsync(id);
+
             if (includeProperties == null || includeProperties.Length == 0)
             {
-                return await table.FindAsync(id);
+                return model;
             }
 
-            return await Get(includeProperties).FirstOrDefaultAsync(i => i.Id.Equals(id));
+            foreach(var item in includeProperties)
+            {
+                await Context.Entry(model).Reference(item).LoadAsync();
+            }
+
+            return model;
         }
 
         public Task<T> GetOneAsync(Expression<Func<T, bool>> predicate, string[] includeProperties = null)
@@ -399,6 +406,21 @@ namespace CMS.Infrastructure.Data.Repositories
                 foreach (var includeProperty in includeProperties)
                 {
                     items = items.Include(includeProperty);
+                }
+            }
+
+            return items;
+        }
+
+        private DbSet<T> IncludeProperties(string[] includeProperties = null)
+        {
+            var items = table;
+
+            if (includeProperties?.Length > 0)
+            {
+                foreach (var includeProperty in includeProperties)
+                {
+                    items.Include(includeProperty);
                 }
             }
 

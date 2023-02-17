@@ -1,6 +1,7 @@
 using CMS.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace CMS.Core.Services
 {
@@ -29,8 +30,8 @@ namespace CMS.Core.Services
                 var user = contextAccessor.HttpContext.User;
                 if (user != null)
                 {
-                    id = user.FindFirst(JwtRegisteredClaimNames.NameId).Value;
-                    userName = user.FindFirst(JwtRegisteredClaimNames.UniqueName).Value;
+                    id = user.FindFirst(ClaimTypes.Name).Value;
+                    userName = user.FindFirst(ClaimTypes.Name).Value;
                 }
             }
 

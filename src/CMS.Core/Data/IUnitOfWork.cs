@@ -17,8 +17,7 @@ namespace CMS.Core.Data
         /// Get the repository
         /// </summary>
         /// <typeparam name="T">entity type</typeparam>
-        /// <typeparam name="TKey">entity id type</typeparam>
         /// <returns>Repository of type</returns>
-        IRepository<T, TKey> Get<T, TKey>() where T : BaseEntity<TKey>, new();
+        IRepository<T> Get<T>() where T : BaseEntity, new();
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CMS.Core.Data.Repositories
 {
-    public interface IRepository<T, TKey> where T : class, new()
+    public interface IRepository<T> where T : class, new()
     {
         /// <summary>
         /// Get all entity with condition
@@ -90,8 +90,8 @@ namespace CMS.Core.Data.Repositories
         /// <param name="id"></param>
         /// <param name="includeProperties"></param>
         /// <returns></returns>
-        Task<T> GetByIdAsync(TKey id, string[] includeProperties = null);
-
+        Task<T> GetByIdAsync(object id, string[] includeProperties = null);
+        
         /// <summary>
         /// Get single async
         /// </summary>

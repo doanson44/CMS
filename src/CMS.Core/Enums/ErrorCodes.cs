@@ -22,6 +22,12 @@ namespace CMS.Core.Enums
         [Description("Data not found")]
         EntityNotFound = 5,
 
+        [Description("Todo item not found")]
+        TodoNotFound = 6,
+
+        [Description("Todo item exits")]
+        TodoExist = 7,
+
         [Description("Bạn không có quyền truy cập.")]
         InvalidPermission = 999,
     }
