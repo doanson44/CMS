@@ -1,6 +1,7 @@
 ﻿using Ardalis.ApiEndpoints;
 using CMS.Core.Data.Entites;
 using CMS.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -33,6 +34,7 @@ public class AuthenticateEndpoint : EndpointBaseAsync
         OperationId = "auth.authenticate",
         Tags = new[] { "AuthEndpoints" })
     ]
+    [AllowAnonymous]
     public override async Task<ActionResult<AuthenticateResponse>> HandleAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
     {
         var response = new AuthenticateResponse();

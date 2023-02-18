@@ -3,7 +3,9 @@ using CMS.Core.Data.Entites;
 using CMS.Core.Settings;
 using CMS.Infrastructure.Data;
 using CMS.WebApi.Middleware;
+using CMS.WebApi.Permission;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +45,9 @@ namespace CMS.WebApi
 
             // mail
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             // database
             services.AddDbContext<ApplicationDbContext>(options =>
