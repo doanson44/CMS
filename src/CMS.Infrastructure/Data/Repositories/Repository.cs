@@ -1,17 +1,12 @@
 using CMS.Core.Data;
-using CMS.Core.Data.Entities;
 using CMS.Core.Data.Extensions;
 using CMS.Core.Data.Repositories;
 using CMS.Core.Domains.Shared;
 using CMS.Core.Enums;
-using CMS.Core.Services.Interfaces;
-using CMS.Core.Settings;
-using CMS.Infrastructure.Extensions;
+using CMS.Core.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -19,220 +14,69 @@ using Z.EntityFramework.Plus;
 
 namespace CMS.Infrastructure.Data.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : BaseEntity, new()
+    public class Repository<T> : IRepository<T> where T : class, new()
     {
         protected readonly ApplicationDbContext Context;
-        private readonly DbSet<T> table;
+        private readonly DbSet<T> dbSet;
         public IQueryable<T> All { get; set; }
         public IQueryable<T> AllWithDeleted { get; set; }
-        private readonly IAuthenticationServices authenticationServices;
-        private readonly ProductionTestingSetting productionTesting;
         private readonly string tableName;
 
-        public Repository(ApplicationDbContext context, IAuthenticationServices authenticationServices, IOptions<ProductionTestingSetting> productionTesting)
+        public Repository(ApplicationDbContext context)
         {
             Context = context;
 
-            table = context.Set<T>();
+            dbSet = context.Set<T>();
 
 #if DEBUG
             tableName = typeof(T).Name;
 #endif
-
-            this.authenticationServices = authenticationServices;
-            this.productionTesting = productionTesting.Value;
-
             SetupSource();
         }
 
         private void SetupSource()
         {
-            var source = table.AsNoTracking();
-
-            // testing enabled and user logged in
-            if (productionTesting.Enable && authenticationServices.IsAuthenticated)
-            {
-                var (id, name) = authenticationServices.GetCurrentUser();
-                var testingUsers = productionTesting.GetUsers();
-                if (productionTesting.IsTestingUser(id.ToString()))
-                {
-                    // only view the data created or belong to testing account
-                    source = source.Where(x => testingUsers.Any(u => u == x.CreatedBy));
-                }
-                else
-                {
-                    // filter records which is not created by these testing users
-                    source = source.Where(x => string.IsNullOrEmpty(x.CreatedBy) || !testingUsers.Any(u => u == x.CreatedBy));
-                }
-            }
-
+            var source = dbSet.AsNoTracking();
             All = source;
             AllWithDeleted = source.IgnoreQueryFilters();
         }
 
-        private string GetCurrentUserId()
+        public async Task AddAsync(T entity)
         {
-            var currentUserId = authenticationServices.GetCurrentUser().id;
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                return string.Empty;
-            }
-
-            return currentUserId;
+            await dbSet.AddAsync(entity);
         }
 
-        private string GetCurrentUserName()
+        public async Task AddRangeAsync(IEnumerable<T> entities)
         {
-            var currentUserId = authenticationServices.GetCurrentUser().userName;
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                return string.Empty;
-            }
-
-            return currentUserId;
+            await dbSet.AddRangeAsync(entities);
         }
 
-        public void Add(T entity)
+        public void Remove(T entity)
         {
-            var now = DateTime.Now;
-            var currentUserName = GetCurrentUserName();
-            if (entity.CreatedAt == DateTime.MinValue)
-            {
-                entity.CreatedAt = now;
-                entity.CreatedBy = currentUserName;
-            }
-            entity.UpdatedAt = now;
-            entity.UpdatedBy = currentUserName;
-
-            table.Add(entity);
+            dbSet.Remove(entity);
         }
 
-        public void AddRange(IEnumerable<T> entities)
+        public async Task<int> BatchRemoveAsync(Expression<Func<T, bool>> predicate)
         {
-            var now = DateTime.Now;
-            var currentUserName = GetCurrentUserName();
-            foreach (var entity in entities)
-            {
-                if (entity.CreatedAt == DateTime.MinValue)
-                {
-                    entity.CreatedAt = now;
-                    entity.CreatedBy = currentUserName;
-                }
-
-                entity.UpdatedAt = now;
-                entity.UpdatedBy = currentUserName;
-
-                table.Add(entity);
-            }
+            return await All.Where(predicate).DeleteAsync(); ;
         }
 
-        public async Task RemoveAsync(T entity, bool really = false)
+        public async Task<int> BatchRemoveForCleanUpResourcesMadebyTestingAccountOnlyAsync(Expression<Func<T, bool>> predicate)
         {
-            var now = DateTime.Now;
-            var currentUserName = GetCurrentUserName();
-
-            if (really)
-            {
-                table.Remove(entity);
-            }
-            else
-            {
-                entity.DeletedAt = now;
-                entity.UpdatedBy = currentUserName;
-                await UpdateAsync(entity, new List<Expression<Func<T, object>>> { x => x.DeletedAt, u => u.UpdatedBy });
-            }
+            var entities = dbSet.AsNoTracking().Where(predicate); // use table directly
+            return await entities.DeleteAsync(); ;
         }
 
-        public async Task<int> BatchRemove(Expression<Func<T, bool>> predicate, bool really = false)
+        public virtual void Update(T updating, List<Expression<Func<T, object>>> updateProperties = null)
         {
-            var currentUserName = GetCurrentUserName();
-            var entities = All.Where(predicate);
-            int deleted;
-
-            if (really)
-            {
-                deleted = await entities.DeleteAsync();
-            }
-            else
-            {
-                var currentUserGuidId = currentUserName;
-                deleted = await entities.UpdateAsync(_ => new T { DeletedAt = DateTime.Now, UpdatedBy = currentUserGuidId });
-            }
-
-            Debug.WriteLine($"> {deleted} {tableName} records deleted");
-
-            return deleted;
+            dbSet.Attach(updating);
+            Context.Entry(updating).State = EntityState.Modified;
         }
 
-        public async Task<int> BatchRemoveForCleanUpResourcesMadebyTestingAccountOnly(Expression<Func<T, bool>> predicate, bool really = false)
+        public async Task<int> BatchUpdateAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> factory)
         {
-            var currentUserName = GetCurrentUserName();
-            var entities = table.AsNoTracking().Where(predicate); // use table directly
-            int deleted;
-
-            if (really)
-            {
-                deleted = await entities.DeleteAsync();
-            }
-            else
-            {
-                var currentUserGuidId = currentUserName;
-                deleted = await entities.UpdateAsync(_ => new T { DeletedAt = DateTime.Now, UpdatedBy = currentUserGuidId });
-            }
-
-            Debug.WriteLine($"> {deleted} {tableName} records deleted");
-
-            return deleted;
-        }
-
-        public virtual Task<T> UpdateAsync(T updating, List<Expression<Func<T, object>>> updateProperties = null)
-        {
-            updating.UpdatedAt = DateTime.Now;
-            var currentUserName = GetCurrentUserName();
-
-            if (!string.IsNullOrEmpty(currentUserName))
-            {
-                updating.UpdatedBy = currentUserName;
-            }
-
-            if (updateProperties?.Count > 0)
-            {
-                // entity must be attached before update any properties
-                table.AttachIfNeed<T>(updating, Context);
-
-                foreach (var p in updateProperties)
-                {
-                    Context.Entry(updating).Property(p).IsModified = true;
-                }
-
-                Context.Entry(updating).Property(x => x.UpdatedAt).IsModified = true;
-            }
-            else
-            {
-                Context.Entry(updating).State = EntityState.Modified; // update all properties
-            }
-
-            if (updating.CreatedAt == DateTime.MinValue)
-                Context.Entry(updating).Property(x => x.CreatedAt).IsModified = false;
-
-            Context.Entry(updating).Property(x => x.UpdatedBy).IsModified = true;
-
-            return Task.FromResult(updating);
-        }
-
-        public async Task<int> BatchUpdate(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> factory)
-        {
-            var currentUserName = GetCurrentUserName();
-            var saved = await AllWithDeleted.Where(predicate).UpdateAsync(_ => new T { UpdatedAt = DateTime.Now, UpdatedBy = currentUserName });
-            saved = await AllWithDeleted.Where(predicate).UpdateAsync(factory);
-
-            Debug.WriteLine($"> Total {saved} {tableName} records saved");
+            var saved = await AllWithDeleted.Where(predicate).UpdateAsync(factory);
             return saved;
-        }
-
-        public Task<int> RestoreAsync(Expression<Func<T, bool>> predicate)
-        {
-            return AllWithDeleted.Where(predicate).UpdateAsync(_ => new T { DeletedAt = null });
         }
 
         public Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate, string[] includeProperties = null)
@@ -289,14 +133,14 @@ namespace CMS.Infrastructure.Data.Repositories
 
         public async Task<T> GetByIdAsync(object id, string[] includeProperties = null)
         {
-            var model = await table.FindAsync(id);
+            var model = await dbSet.FindAsync(id);
 
             if (includeProperties == null || includeProperties.Length == 0)
             {
                 return model;
             }
 
-            foreach(var item in includeProperties)
+            foreach (var item in includeProperties)
             {
                 await Context.Entry(model).Reference(item).LoadAsync();
             }
@@ -314,21 +158,6 @@ namespace CMS.Infrastructure.Data.Repositories
             return Get(predicate, includeProperties).Select(selector).SingleOrDefaultAsync();
         }
 
-        public Task<T> GetOneDeletedAsync(Expression<Func<T, bool>> predicate, string[] includeProperties = null)
-        {
-            return GetDeleted(includeProperties).Where(predicate).OrderByDescending(x => x.UpdatedAt).FirstOrDefaultAsync();
-        }
-
-        public Task<TResult> GetOneDeletedAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector, string[] includeProperties = null)
-        {
-            return GetDeleted(includeProperties).Where(predicate).OrderByDescending(x => x.UpdatedAt).Select(selector).FirstOrDefaultAsync();
-        }
-
-        public Task<T> GetOneAsync(ISpecification<T> spec, string[] includeProperties = null)
-        {
-            return ApplySpecification(spec, includeProperties).SingleOrDefaultAsync();
-        }
-
         public Task<int> CountAsync(Expression<Func<T, bool>> predicate = null)
         {
             if (predicate == null)
@@ -342,15 +171,15 @@ namespace CMS.Infrastructure.Data.Repositories
         public async Task<EntityExistanceState> GetStateAsync(Expression<Func<T, bool>> where)
         {
             var items = AllWithDeleted;
-            var found = await items.Where(x => x.DeletedAt != null).AnyAsync(where);
+            var found = await items.AnyAsync(where);
 
             if (found)
             {
-                return Core.Enums.EntityExistanceState.Archived;
+                return EntityExistanceState.Archived;
             }
 
-            found = await items.Where(x => x.DeletedAt == null).AnyAsync(where);
-            return found ? Core.Enums.EntityExistanceState.Live : Core.Enums.EntityExistanceState.None;
+            found = await items.AnyAsync(where);
+            return found ? EntityExistanceState.Live : EntityExistanceState.None;
         }
 
         public Task<bool> IsLiveAsync(Expression<Func<T, bool>> where)
@@ -414,7 +243,7 @@ namespace CMS.Infrastructure.Data.Repositories
 
         private DbSet<T> IncludeProperties(string[] includeProperties = null)
         {
-            var items = table;
+            var items = dbSet;
 
             if (includeProperties?.Length > 0)
             {

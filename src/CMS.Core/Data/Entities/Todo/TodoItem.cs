@@ -1,8 +1,9 @@
-﻿using CMS.Core.Domains;
+﻿using CMS.Core.Data.Entites;
+using CMS.Core.Domains;
 
 namespace CMS.Core.Data.Entities.Todo
 {
-    public class TodoItem : BaseEntity
+    public class TodoItem
     {
         public int TodoItemId { get; set; }
         public string Item { get; set; }

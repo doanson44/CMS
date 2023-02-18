@@ -91,42 +91,23 @@ namespace CMS.Core.Data.Repositories
         /// <param name="includeProperties"></param>
         /// <returns></returns>
         Task<T> GetByIdAsync(object id, string[] includeProperties = null);
-        
-        /// <summary>
-        /// Get single async
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <param name="includeProperties"></param>
-        /// <returns></returns>
-        Task<T> GetOneAsync(Expression<Func<T, bool>> predicate, string[] includeProperties = null);
-        Task<TResult> GetOneAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector, string[] includeProperties = null);
-        Task<T> GetOneDeletedAsync(Expression<Func<T, bool>> predicate, string[] includeProperties = null);
-        Task<TResult> GetOneDeletedAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector, string[] includeProperties = null);
-        Task<T> GetOneAsync(ISpecification<T> spec, string[] includeProperties = null);
 
         /// <summary>
         /// Add
         /// </summary>
         /// <param name="entity"></param>
-        void Add(T entity);
+        Task AddAsync(T entity);
 
-        void AddRange(IEnumerable<T> entities);
+        Task AddRangeAsync(IEnumerable<T> entities);
 
         /// <summary>
         /// Remove
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="really">true to soft delete</param>
-        Task RemoveAsync(T entity, bool really = false);
-        Task<int> BatchRemove(Expression<Func<T, bool>> predicate, bool really = false);
-        Task<int> BatchRemoveForCleanUpResourcesMadebyTestingAccountOnly(Expression<Func<T, bool>> predicate, bool really = false);
-
-        /// <summary>
-        /// Restore entities
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        Task<int> RestoreAsync(Expression<Func<T, bool>> predicate);
+        void Remove(T entity);
+        Task<int> BatchRemoveAsync(Expression<Func<T, bool>> predicate);
+        Task<int> BatchRemoveForCleanUpResourcesMadebyTestingAccountOnlyAsync(Expression<Func<T, bool>> predicate);
 
         /// <summary>
         /// update the entity
@@ -134,9 +115,9 @@ namespace CMS.Core.Data.Repositories
         /// <param name="updating">entity to update</param>
         /// <param name="updateProperties">update properties</param>
         /// <returns></returns>
-        Task<T> UpdateAsync(T updating, List<Expression<Func<T, object>>> updateProperties = null);
+        void Update(T updating, List<Expression<Func<T, object>>> updateProperties = null);
 
-        Task<int> BatchUpdate(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> factory);
+        Task<int> BatchUpdateAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> factory);
 
         Task<EntityExistanceState> GetStateAsync(Expression<Func<T, bool>> where);
         Task<bool> IsLiveAsync(Expression<Func<T, bool>> where);

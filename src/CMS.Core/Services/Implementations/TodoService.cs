@@ -1,4 +1,5 @@
 ﻿using CMS.Core.Data;
+using CMS.Core.Data.Entites;
 using CMS.Core.Data.Entities.Todo;
 using CMS.Core.Data.Extensions;
 using CMS.Core.Data.Repositories;
@@ -7,6 +8,7 @@ using CMS.Core.Domains.Shared;
 using CMS.Core.Enums;
 using CMS.Core.Exceptions;
 using CMS.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Threading.Tasks;
 
@@ -52,7 +54,7 @@ namespace CMS.Core.Services.Implementations
             {
                 throw new BusinessException(ErrorCodes.TodoExist);
             }
-            todoRepository.Add(todo);
+            await todoRepository.AddAsync(todo);
 
             await unitOfWork.SaveChangesAsync();
         }
@@ -66,7 +68,7 @@ namespace CMS.Core.Services.Implementations
                 throw new BusinessException(ErrorCodes.TodoNotFound);
             }
 
-            await todoRepository.RemoveAsync(todo);
+            todoRepository.Remove(todo);
 
             await unitOfWork.SaveChangesAsync();
         }
@@ -95,7 +97,7 @@ namespace CMS.Core.Services.Implementations
             todo.Description = request.Description;
             todo.Minutes = request.Minutes;
 
-            await todoRepository.UpdateAsync(todo);
+            todoRepository.Update(todo);
             await unitOfWork.SaveChangesAsync();
         }
     }

@@ -1,5 +1,6 @@
 ﻿using CMS.Core.Domains;
 using CMS.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -7,7 +8,8 @@ namespace CMS.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TodoController : Controller
+    [Authorize]
+    public class TodoController : BaseApiController
     {
         private readonly ITodoService todoService;
 

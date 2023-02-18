@@ -1,5 +1,4 @@
 using CMS.Core.Data;
-using CMS.Core.Data.Entities;
 using CMS.Core.Data.Repositories;
 using CMS.Core.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -28,73 +27,38 @@ namespace CMS.Infrastructure.Data
 
         public async Task<int> SaveChangesAsync()
         {
+            var saved = 0;
             try
             {
-                context.ChangeTracker.DetectChanges();
-                var entries = context.ChangeTracker.Entries()
-                    .Where(x => x.Entity is IBaseEntity && (x.State == EntityState.Added || x.State == EntityState.Modified));
-                var (id, userName) = authenticationServices.GetCurrentUser();
-
-                foreach (var entry in entries)
-                {
-                    if (entry.State == EntityState.Added)
-                    {
-                        if (!string.IsNullOrEmpty(userName))
-                        {
-                            ((IBaseEntity)entry.Entity).CreatedBy = userName.ToString();
-                        }
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(userName))
-                        {
-                            ((IBaseEntity)entry.Entity).UpdatedBy = userName.ToString();
-                        }
-                        context.Entry((IBaseEntity)entry.Entity).Property(x => x.UpdatedBy).IsModified = true;
-                    }
-
-                    LogEntry(entry.State, entry);
-                }
-
-                var saved = 0;
+                saved = await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
                 try
                 {
-                    saved = await context.SaveChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    try
+                    if (ex?.InnerException != null)
                     {
-                        if (ex?.InnerException != null)
+                        var entriesEx = context.ChangeTracker.Entries().Where((x => x.State == EntityState.Added || x.State == EntityState.Modified));
+                        foreach (var entry in entriesEx)
                         {
-                            var entriesEx = context.ChangeTracker.Entries().Where(x => x.Entity is IBaseEntity &&
-                                                                       (x.State == EntityState.Added || x.State == EntityState.Modified));
-                            foreach (var entry in entriesEx)
+                            foreach (var prop in entry.CurrentValues.Properties)
                             {
-                                foreach (var prop in entry.CurrentValues.Properties)
-                                {
-                                    Console.WriteLine("End======================================================================");
-                                    var val = prop.PropertyInfo.GetValue(entry.Entity);
-                                    Console.WriteLine($"Handle Error: {prop?.ToString()} ~ ({val?.ToString().Length})({val})");
-                                }
+                                Console.WriteLine("End======================================================================");
+                                var val = prop.PropertyInfo.GetValue(entry.Entity);
+                                Console.WriteLine($"Handle Error: {prop?.ToString()} ~ ({val?.ToString().Length})({val})");
                             }
                         }
                     }
-                    catch (Exception except)
-                    {
-                        //throw;
-                    }
                 }
-
-                Debug.WriteLine($"> {saved} records saved");
-
-                return saved;
+                catch (Exception except)
+                {
+                    //throw;
+                }
             }
-            catch (Exception systemEx)
-            {
-                //throw;
-                return -1;
-            }
+
+            Debug.WriteLine($"> {saved} records saved");
+
+            return saved;
         }
 
         public void Dispose()
@@ -113,7 +77,7 @@ namespace CMS.Infrastructure.Data
             context = null;
         }
 
-        public IRepository<T> Get<T>() where T : BaseEntity, new()
+        public IRepository<T> Get<T>() where T : class, new()
         {
             return servicesProvider.GetRequiredService<IRepository<T>>();
         }

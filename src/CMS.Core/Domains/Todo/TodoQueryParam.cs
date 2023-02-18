@@ -2,5 +2,7 @@ using CMS.Core.Domains.Shared;
 
 namespace CMS.Core.Domains
 {
-    public class TodoQueryParam : QueryParam { }
+    public class TodoQueryParam : QueryParam
+    {
+    }
 }

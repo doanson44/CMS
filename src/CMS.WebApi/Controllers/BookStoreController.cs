@@ -8,7 +8,7 @@ namespace CMS.WebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class BookStoreController : ControllerBase
+    public class BookStoreController : BaseApiController
     {
         private readonly IBookStoreQueryService _bookStoreQueryService;
 
