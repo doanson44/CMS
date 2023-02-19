@@ -15,7 +15,7 @@ namespace CMS.Core.Data.Entities
         [Column(TypeName = "NVARCHAR")]
         public string Name { get; set; }
 
-        public virtual IList<DetailNews> News { get; set; } = new List<DetailNews>();
+        public virtual ICollection<DetailNews> DetailNews { get; set; }
 
         public CategoryNews() { }
 

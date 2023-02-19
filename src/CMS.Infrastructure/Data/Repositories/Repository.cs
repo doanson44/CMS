@@ -5,9 +5,11 @@ using CMS.Core.Domains.Shared;
 using CMS.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Z.EntityFramework.Plus;
 
@@ -141,10 +143,30 @@ namespace CMS.Infrastructure.Data.Repositories
 
             foreach (var item in includeProperties)
             {
-                await Context.Entry(model).Reference(item).LoadAsync();
+                var propInfo = GetProp(model, item);
+                if (!IsEnumerableType(propInfo))
+                {
+                    await Context.Entry(model).Reference(item).LoadAsync();
+                }
+                else
+                {
+                    await Context.Entry(model).Collection(item).LoadAsync();
+                }
             }
 
             return model;
+        }
+
+        private bool IsEnumerableType(PropertyInfo prop)
+        {
+            return typeof(IEnumerable).IsAssignableFrom(prop.PropertyType) && prop.PropertyType != typeof(string);
+        }
+
+        private PropertyInfo GetProp(object source, string name)
+        {
+            var type = source.GetType();
+            var prop = type.GetProperty(name);
+            return prop;
         }
 
         public Task<T> GetOneAsync(Expression<Func<T, bool>> predicate, string[] includeProperties = null)

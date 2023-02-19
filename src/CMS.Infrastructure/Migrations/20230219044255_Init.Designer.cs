@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230219014743_Add_News_CategoryNews_Table")]
-    partial class Add_News_CategoryNews_Table
+    [Migration("20230219044255_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -104,6 +104,9 @@ namespace CMS.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("CategoryNews");
                 });
 
@@ -121,9 +124,6 @@ namespace CMS.Infrastructure.Migrations
 
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ReferenceBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -331,7 +331,7 @@ namespace CMS.Infrastructure.Migrations
                     b.HasOne("CMS.Core.Data.Entities.DetailNews", "DetailNews")
                         .WithOne("ViewNews")
                         .HasForeignKey("CMS.Core.Data.Entities.ViewNews", "DetailNewsId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DetailNews");

@@ -60,14 +60,14 @@ namespace CMS.Core.Services
 
         public async Task DeleteAsync(int id)
         {
-            var categoryNews = await categoryNewsRepository.GetByIdAsync(id, new[] { nameof(CategoryNews.News) });
+            var categoryNews = await categoryNewsRepository.GetByIdAsync(id, new[] { "DetailNews" });
 
             if (categoryNews == null)
             {
                 throw new BusinessException(ErrorCodes.CategoryNewsNotFound);
             }
 
-            if (categoryNews.News != null && categoryNews.News.Any())
+            if (categoryNews.DetailNews != null && categoryNews.DetailNews.Any())
             {
                 throw new BusinessException(ErrorCodes.NotPermissionDeleteCategoryNews);
             }
@@ -79,7 +79,7 @@ namespace CMS.Core.Services
 
         public async Task<CategoryNewsDto> GetByIdAsync(int id)
         {
-            var categoryNews = await categoryNewsRepository.GetByIdAsync(id, new[] { nameof(CategoryNews.News) });
+            var categoryNews = await categoryNewsRepository.GetByIdAsync(id, new[] { nameof(DetailNews) });
             if (categoryNews == null)
             {
                 throw new BusinessException(ErrorCodes.CategoryNewsNotFound);

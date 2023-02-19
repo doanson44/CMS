@@ -102,6 +102,9 @@ namespace CMS.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("CategoryNews");
                 });
 
@@ -119,9 +122,6 @@ namespace CMS.Infrastructure.Migrations
 
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ReferenceBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -329,7 +329,7 @@ namespace CMS.Infrastructure.Migrations
                     b.HasOne("CMS.Core.Data.Entities.DetailNews", "DetailNews")
                         .WithOne("ViewNews")
                         .HasForeignKey("CMS.Core.Data.Entities.ViewNews", "DetailNewsId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DetailNews");
