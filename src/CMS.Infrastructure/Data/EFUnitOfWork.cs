@@ -50,7 +50,7 @@ namespace CMS.Infrastructure.Data
                         }
                     }
                 }
-                catch (Exception except)
+                catch (Exception)
                 {
                     //throw;
                 }

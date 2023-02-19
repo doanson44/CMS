@@ -1,5 +1,4 @@
-﻿using CMS.Core.Data.Entites;
-using CMS.Core.Domains;
+﻿using CMS.Core.Domains;
 
 namespace CMS.Core.Data.Entities.Todo
 {

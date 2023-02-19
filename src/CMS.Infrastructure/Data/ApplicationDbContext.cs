@@ -1,4 +1,5 @@
 ﻿using CMS.Core.Data.Entites;
+using CMS.Core.Data.Entities;
 using CMS.Core.Data.Entities.Todo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -10,6 +11,9 @@ namespace CMS.Infrastructure.Data
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public virtual DbSet<TodoItem> TodoItems { get; set; }
+
+        public virtual DbSet<CategoryNews> CategoryNews { get; set; }
+        public virtual DbSet<DetailNews> DetailNews { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -32,8 +36,6 @@ namespace CMS.Infrastructure.Data
             builder.Entity<IdentityUserRole<string>>(entity =>
             {
                 entity.ToTable("UserRoles");
-                //in case you chagned the TKey type
-                //  entity.HasKey(key => new { key.UserId, key.RoleId });
             });
 
             builder.Entity<IdentityUserClaim<string>>(entity =>
@@ -44,8 +46,6 @@ namespace CMS.Infrastructure.Data
             builder.Entity<IdentityUserLogin<string>>(entity =>
             {
                 entity.ToTable("UserLogins");
-                //in case you chagned the TKey type
-                //  entity.HasKey(key => new { key.ProviderKey, key.LoginProvider });       
             });
 
             builder.Entity<IdentityRoleClaim<string>>(entity =>
@@ -57,8 +57,6 @@ namespace CMS.Infrastructure.Data
             builder.Entity<IdentityUserToken<string>>(entity =>
             {
                 entity.ToTable("UserTokens");
-                //in case you chagned the TKey type
-                // entity.HasKey(key => new { key.UserId, key.LoginProvider, key.Name });
 
             });
 

@@ -28,6 +28,18 @@ namespace CMS.Core.Enums
         [Description("Todo item exits")]
         TodoExist = 7,
 
+        [Description("Loại tin tức này đã tồn tại.")]
+        CategoryNewsExist = 8,
+
+        [Description("Không tìm thấy loại tin tức này.")]
+        CategoryNewsNotFound = 9,
+
+        [Description("Bạn không có quyền xóa loại tin tức này.")]
+        NotPermissionDeleteCategoryNews = 10,
+
+        [Description("Tin tức này không tồn tại.")]
+        DetailNewsNotFound = 11,
+
         [Description("Bạn không có quyền truy cập.")]
         InvalidPermission = 999,
     }

@@ -1,7 +1,6 @@
 ﻿using CMS.Core.Constants;
 using CMS.WebApi.Helpers;
 using CMS.WebApi.ViewModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;

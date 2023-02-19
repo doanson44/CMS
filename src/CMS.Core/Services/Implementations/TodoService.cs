@@ -1,5 +1,4 @@
 ﻿using CMS.Core.Data;
-using CMS.Core.Data.Entites;
 using CMS.Core.Data.Entities.Todo;
 using CMS.Core.Data.Extensions;
 using CMS.Core.Data.Repositories;
@@ -8,7 +7,6 @@ using CMS.Core.Domains.Shared;
 using CMS.Core.Enums;
 using CMS.Core.Exceptions;
 using CMS.Core.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.Threading.Tasks;
 
