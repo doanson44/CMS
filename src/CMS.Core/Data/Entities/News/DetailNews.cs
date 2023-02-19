@@ -22,8 +22,6 @@ namespace CMS.Core.Data.Entities
 
         public DetailNewsStatus Status { get; set; }
 
-        public string ReferenceBy { get; set; }
-
         public virtual CategoryNews CategoryNews { get; set; }
 
         public virtual ViewNews ViewNews { get; set; }
