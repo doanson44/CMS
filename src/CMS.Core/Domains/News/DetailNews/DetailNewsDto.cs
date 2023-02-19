@@ -30,7 +30,6 @@ namespace CMS.Core.Domains
             Content = e.Content;
             ExpiredDate = e.ExpiredDate;
             Status = e.Status;
-            CategoryNewsId = e.CategoryNewsId;
 
             if (e.CategoryNews != null)
             {

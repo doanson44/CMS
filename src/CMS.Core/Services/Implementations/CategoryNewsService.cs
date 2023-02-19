@@ -79,7 +79,7 @@ namespace CMS.Core.Services
 
         public async Task<CategoryNewsDto> GetByIdAsync(int id)
         {
-            var categoryNews = await categoryNewsRepository.GetByIdAsync(id);
+            var categoryNews = await categoryNewsRepository.GetByIdAsync(id, new[] { nameof(CategoryNews.News) });
             if (categoryNews == null)
             {
                 throw new BusinessException(ErrorCodes.CategoryNewsNotFound);

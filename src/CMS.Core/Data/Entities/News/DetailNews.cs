@@ -24,7 +24,6 @@ namespace CMS.Core.Data.Entities
 
         public string ReferenceBy { get; set; }
 
-        public int? CategoryNewsId { get; set; }
         public virtual CategoryNews CategoryNews { get; set; }
 
         public virtual ViewNews ViewNews { get; set; }
@@ -33,7 +32,6 @@ namespace CMS.Core.Data.Entities
 
         public DetailNews(DetailNewsRequest request)
         {
-            CategoryNewsId = request.CategoryNewsId;
             Title = request.Title;
             Content = request.Content;
             ExpiredDate = request.ExpiredDate;

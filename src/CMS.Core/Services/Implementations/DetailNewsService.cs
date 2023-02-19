@@ -16,6 +16,7 @@ namespace CMS.Core.Services.Implementations
     {
         private readonly IRepository<DetailNews> detailNewsRepository;
         private readonly IRepository<ViewNews> viewNewsRepository;
+        private readonly IRepository<CategoryNews> categoryNewsRepository;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICategoryNewsService categoryNewsService;
         private const string OtherType = "Khác";
@@ -28,6 +29,7 @@ namespace CMS.Core.Services.Implementations
             this.categoryNewsService = categoryNewsService;
             detailNewsRepository = unitOfWork.Get<DetailNews>();
             viewNewsRepository = unitOfWork.Get<ViewNews>();
+            categoryNewsRepository = unitOfWork.Get<CategoryNews>();
         }
 
         public async Task<PagedList<DetailNewsDto>> GetAllAsync(DetailNewsQueryParam query)
@@ -47,7 +49,7 @@ namespace CMS.Core.Services.Implementations
 
             if (query.CategoryNewsId != null)
             {
-                condition = condition.And(x => x.CategoryNewsId == query.CategoryNewsId);
+                condition = condition.And(x => x.CategoryNews.Id == query.CategoryNewsId);
             }
 
             var result = await detailNewsRepository.GetPagedListAsync(
@@ -58,7 +60,6 @@ namespace CMS.Core.Services.Implementations
                     Title = x.Title,
                     ExpiredDate = x.ExpiredDate,
                     Status = x.Status,
-                    CategoryNewsId = x.CategoryNewsId,
                     ViewNews = new ViewNewsDto(x.ViewNews),
                     CategoryNews = new CategoryNewsDto(x.CategoryNews)
                 },
@@ -72,7 +73,9 @@ namespace CMS.Core.Services.Implementations
 
         public async Task CreateAsync(DetailNewsRequest request)
         {
+            var category = await categoryNewsRepository.GetByIdAsync(request.CategoryNewsId);
             var detailNews = new DetailNews(request);
+            detailNews.CategoryNews = category;
             await detailNewsRepository.AddAsync(detailNews);
             var isSuccess = await unitOfWork.SaveChangesAsync();
 
@@ -118,7 +121,11 @@ namespace CMS.Core.Services.Implementations
             }
 
             var oldStatus = detailNews.Status;
-            detailNews.CategoryNewsId = request.CategoryNewsId;
+            if (detailNews.CategoryNews.Id != request.CategoryNewsId)
+            {
+                var category = await categoryNewsRepository.GetByIdAsync(request.CategoryNewsId);
+                detailNews.CategoryNews = category;
+            }
             detailNews.Title = request.Title;
             detailNews.Content = request.Content;
             detailNews.ExpiredDate = request.ExpiredDate;

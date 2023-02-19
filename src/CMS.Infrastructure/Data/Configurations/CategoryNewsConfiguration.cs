@@ -9,6 +9,8 @@ namespace CMS.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<CategoryNews> builder)
         {
             builder.HasKey(x => x.Id);
+            var navigation = builder.Metadata.FindNavigation(nameof(CategoryNews.News));
+            navigation?.SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.HasIndex(x => new { x.Name }).IsUnique();
         }
     }
