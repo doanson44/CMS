@@ -7,7 +7,7 @@ namespace CMS.WebApi.Configuration;
 
 public static class ConfigureCookieSettings
 {
-    public const int ValidityMinutesPeriod = 60;
+    public const int ValidityMinutesPeriod = 1;
     public const string IdentifierCookieName = "EshopIdentifier";
 
     public static IServiceCollection AddCookieSettings(this IServiceCollection services)
@@ -24,7 +24,7 @@ public static class ConfigureCookieSettings
             options.EventsType = typeof(RevokeAuthenticationEvents);
             options.Cookie.HttpOnly = true;
             options.ExpireTimeSpan = TimeSpan.FromMinutes(ValidityMinutesPeriod);
-            options.LoginPath = "/Account/Login";
+            options.LoginPath = "/Account/Unauthorized";
             options.LogoutPath = "/Account/Logout";
             options.Cookie = new CookieBuilder
             {

@@ -72,7 +72,7 @@ public class UserController : ControllerBase
         return StatusCode(StatusCodes.Status403Forbidden);
     }
 
-    [HttpGet("/Account/Login")]
+    [HttpGet("/Account/Unauthorized")]
     [Authorize]
     [AllowAnonymous]
     [ApiExplorerSettings(IgnoreApi = true)]

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using CMS.Core.Constants;
 using CMS.Core.Data.Entites;
 using CMS.Core.Settings;
 using CMS.Infrastructure.Data;
+using CMS.WebApi.Configuration;
 using CMS.WebApi.Middleware;
 using CMS.WebApi.Permission;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -63,7 +65,7 @@ public class Startup
 
         services.Configure<MultipleDatabaseSettings>(Configuration.GetSection(nameof(MultipleDatabaseSettings)));
         services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
-
+        services.AddCookieSettings();
         var key = Encoding.ASCII.GetBytes(AuthorizationConstants.JWT_SECRET_KEY);
         services.AddAuthentication(config =>
         {
@@ -78,7 +80,8 @@ public class Startup
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = false,
-                ValidateAudience = false
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
             };
         });
 
@@ -165,14 +168,13 @@ public class Startup
             c.RoutePrefix = string.Empty;
         });
 
-        app.UseRouting();
-
         app.UseCors(CORS_POLICY);
         app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("content-disposition"));
 
 
         app.UseCookiePolicy();
         app.UseAuthentication();
+        app.UseRouting();
         app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>

@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CMS.Core.Domains;
 using CMS.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +9,7 @@ namespace CMS.WebApi.Controllers;
 [Route("cms/categorynews")]
 [ApiController]
 [Authorize]
-public class CategoryNewsController : Controller
+public class CategoryNewsController : BaseApiController
 {
     private readonly ICategoryNewsService _categoryNewsService;
 
@@ -21,6 +21,7 @@ public class CategoryNewsController : Controller
     [HttpGet("get-all")]
     public async Task<IActionResult> GetAllAsync([FromQuery] CategoryNewsQueryParam request)
     {
+        var x = CurrentUser;
         var result = await _categoryNewsService.GetAllAsync(request);
         return Ok(result);
     }
