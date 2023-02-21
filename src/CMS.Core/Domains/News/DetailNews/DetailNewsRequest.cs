@@ -1,20 +1,19 @@
-using CMS.Core.Enums;
 using System;
+using CMS.Core.Enums;
 
-namespace CMS.Core.Domains
+namespace CMS.Core.Domains;
+
+public class DetailNewsRequest
 {
-    public class DetailNewsRequest
-    {
-        public Guid? Id { get; set; }
+    public Guid? Id { get; set; }
 
-        public int? CategoryNewsId { get; set; }
+    public int? CategoryNewsId { get; set; }
 
-        public string Title { get; set; }
+    public string Title { get; set; }
 
-        public string Content { get; set; }
+    public string Content { get; set; }
 
-        public DateTime ExpiredDate { get; set; }
+    public DateTime ExpiredDate { get; set; }
 
-        public DetailNewsStatus Status { get; set; }
-    }
+    public DetailNewsStatus Status { get; set; }
 }

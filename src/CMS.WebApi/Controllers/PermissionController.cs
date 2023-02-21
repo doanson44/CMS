@@ -1,63 +1,62 @@
-﻿using CMS.Core.Constants;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CMS.Core.Constants;
 using CMS.WebApi.Helpers;
 using CMS.WebApi.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace CMS.WebApi.Controllers
+namespace CMS.WebApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class PermissionController : BaseApiController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PermissionController : BaseApiController
+    private readonly RoleManager<IdentityRole> _roleManager;
+
+    public PermissionController(RoleManager<IdentityRole> roleManager)
     {
-        private readonly RoleManager<IdentityRole> _roleManager;
+        _roleManager = roleManager;
+    }
 
-        public PermissionController(RoleManager<IdentityRole> roleManager)
+    [HttpGet("get-all")]
+    public async Task<IActionResult> GetAllAsync(string roleName)
+    {
+        var model = new PermissionViewModel();
+        var allPermissions = new List<RoleClaimsViewModel>();
+        allPermissions.GetPermissions(typeof(Permissions.TodoModule), roleName);
+        var role = await _roleManager.FindByNameAsync(roleName);
+        model.RoleName = roleName;
+        var claims = await _roleManager.GetClaimsAsync(role);
+        var allClaimValues = allPermissions.Select(a => a.Value).ToList();
+        var roleClaimValues = claims.Select(a => a.Value).ToList();
+        var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
+        foreach (var permission in allPermissions)
         {
-            _roleManager = roleManager;
+            if (authorizedClaims.Any(a => a == permission.Value))
+            {
+                permission.Selected = true;
+            }
         }
+        model.RoleClaims = allPermissions;
+        return Ok(model);
+    }
 
-        [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllAsync(string roleName)
+    [HttpPost]
+    public async Task<IActionResult> Update(PermissionViewModel model)
+    {
+        var role = await _roleManager.FindByNameAsync(model.RoleName);
+        var claims = await _roleManager.GetClaimsAsync(role);
+        foreach (var claim in claims)
         {
-            var model = new PermissionViewModel();
-            var allPermissions = new List<RoleClaimsViewModel>();
-            allPermissions.GetPermissions(typeof(Permissions.TodoModule), roleName);
-            var role = await _roleManager.FindByNameAsync(roleName);
-            model.RoleName = roleName;
-            var claims = await _roleManager.GetClaimsAsync(role);
-            var allClaimValues = allPermissions.Select(a => a.Value).ToList();
-            var roleClaimValues = claims.Select(a => a.Value).ToList();
-            var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
-            foreach (var permission in allPermissions)
-            {
-                if (authorizedClaims.Any(a => a == permission.Value))
-                {
-                    permission.Selected = true;
-                }
-            }
-            model.RoleClaims = allPermissions;
-            return Ok(model);
+            await _roleManager.RemoveClaimAsync(role, claim);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> Update(PermissionViewModel model)
+        var selectedClaims = model.RoleClaims.Where(a => a.Selected).ToList();
+        foreach (var claim in selectedClaims)
         {
-            var role = await _roleManager.FindByNameAsync(model.RoleName);
-            var claims = await _roleManager.GetClaimsAsync(role);
-            foreach (var claim in claims)
-            {
-                await _roleManager.RemoveClaimAsync(role, claim);
-            }
-            var selectedClaims = model.RoleClaims.Where(a => a.Selected).ToList();
-            foreach (var claim in selectedClaims)
-            {
-                await _roleManager.AddPermissionClaim(role, claim.Value);
-            }
-            return Ok();
+            await _roleManager.AddPermissionClaim(role, claim.Value);
         }
+        return Ok();
     }
 }

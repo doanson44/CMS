@@ -1,4 +1,9 @@
-﻿using Ardalis.GuardClauses;
+﻿using System;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using Ardalis.GuardClauses;
 using CMS.Core.Data.Entites;
 using CMS.Core.Extensions;
 using CMS.Core.Services.Interfaces;
@@ -7,11 +12,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
 namespace CMS.WebApi.Controllers;
 
@@ -504,7 +504,7 @@ public class ManageController : Controller
     private string FormatKey(string unformattedKey)
     {
         var result = new StringBuilder();
-        int currentPosition = 0;
+        var currentPosition = 0;
         while (currentPosition + 4 < unformattedKey.Length)
         {
             result.Append(unformattedKey.Substring(currentPosition, 4)).Append(" ");

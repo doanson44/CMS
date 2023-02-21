@@ -1,3 +1,6 @@
+using System;
+using System.Net;
+using System.Threading.Tasks;
 using CMS.Core.Data.Entites;
 using CMS.Infrastructure.Data;
 using CMS.Infrastructure.Identity;
@@ -7,72 +10,68 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Net;
-using System.Threading.Tasks;
 
-namespace CMS.WebApi
+namespace CMS.WebApi;
+
+public class Program
 {
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            var host = CreateWebHostBuilder(args).Build();
+        var host = CreateWebHostBuilder(args).Build();
 
-            try
+        try
+        {
+            using (var scope = host.Services.CreateScope())
             {
-                using (var scope = host.Services.CreateScope())
-                {
-                    var services = scope.ServiceProvider;
-                    var context = services.GetRequiredService<ApplicationDbContext>();
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<ApplicationDbContext>();
 
-                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                    var identityContext = services.GetRequiredService<ApplicationDbContext>();
-                    await ApplicationDbContextSeed.SeedAsync(identityContext, userManager, roleManager);
-                }
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                var identityContext = services.GetRequiredService<ApplicationDbContext>();
+                await ApplicationDbContextSeed.SeedAsync(identityContext, userManager, roleManager);
             }
-            catch { }
-
-            host.Run();
         }
+        catch { }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .ConfigureAppConfiguration(SetupConfiguration)
-                .UseSentry(options =>
-                {
-                    options.Release = "e386dfd"; // Could be also the be like: 2.0 or however your version your app
-                    options.TracesSampleRate = 0.1;
-                    options.MaxBreadcrumbs = 200;
+        host.Run();
+    }
 
-                    // Set a proxy for outgoing HTTP connections
-                    options.HttpProxy = null;
+    public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        WebHost.CreateDefaultBuilder(args)
+            .UseStartup<Startup>()
+            .ConfigureAppConfiguration(SetupConfiguration)
+            .UseSentry(options =>
+            {
+                options.Release = "e386dfd"; // Could be also the be like: 2.0 or however your version your app
+                options.TracesSampleRate = 0.1;
+                options.MaxBreadcrumbs = 200;
 
-                    // Example: Disabling support to compressed responses:
-                    options.DecompressionMethods = DecompressionMethods.None;
+                // Set a proxy for outgoing HTTP connections
+                options.HttpProxy = null;
 
-                    options.MaxQueueItems = 100;
-                    options.ShutdownTimeout = TimeSpan.FromSeconds(10);
+                // Example: Disabling support to compressed responses:
+                options.DecompressionMethods = DecompressionMethods.None;
 
-                    // Configures the root scope
-                    options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
-                })
-            ;
+                options.MaxQueueItems = 100;
+                options.ShutdownTimeout = TimeSpan.FromSeconds(10);
 
-        private static void SetupConfiguration(WebHostBuilderContext hostingContext, IConfigurationBuilder configBuilder)
-        {
-            var env = hostingContext.HostingEnvironment;
+                // Configures the root scope
+                options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
+            })
+        ;
 
-            configBuilder.SetBasePath(env.ContentRootPath)
-                .AddEnvironmentVariables();
+    private static void SetupConfiguration(WebHostBuilderContext hostingContext, IConfigurationBuilder configBuilder)
+    {
+        var env = hostingContext.HostingEnvironment;
 
-            configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-            configBuilder.AddEnvironmentVariables();
+        configBuilder.SetBasePath(env.ContentRootPath)
+            .AddEnvironmentVariables();
 
-            configBuilder.Build();
-        }
+        configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        configBuilder.AddEnvironmentVariables();
+
+        configBuilder.Build();
     }
 }

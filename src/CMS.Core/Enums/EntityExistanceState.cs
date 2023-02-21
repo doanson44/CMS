@@ -1,9 +1,8 @@
-namespace CMS.Core.Enums
+namespace CMS.Core.Enums;
+
+public enum EntityExistanceState
 {
-    public enum EntityExistanceState
-    {
-        None = 0, // not exist
-        Live = 1, // living
-        Archived = 2 // archived
-    }
+    None = 0, // not exist
+    Live = 1, // living
+    Archived = 2 // archived
 }

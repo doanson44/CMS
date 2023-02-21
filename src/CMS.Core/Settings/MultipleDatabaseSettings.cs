@@ -1,7 +1,6 @@
-﻿namespace CMS.Core.Settings
+﻿namespace CMS.Core.Settings;
+
+public class MultipleDatabaseSettings
 {
-    public class MultipleDatabaseSettings
-    {
-        public string BookStoreDbConnectionString { get; set; }
-    }
+    public string BookStoreDbConnectionString { get; set; }
 }

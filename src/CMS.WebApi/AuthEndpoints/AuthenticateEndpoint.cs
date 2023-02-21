@@ -1,12 +1,12 @@
-﻿using Ardalis.ApiEndpoints;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Ardalis.ApiEndpoints;
 using CMS.Core.Data.Entites;
 using CMS.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace CMS.WebApi.AuthEndpoints;
 

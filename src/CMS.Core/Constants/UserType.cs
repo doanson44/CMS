@@ -1,7 +1,6 @@
-namespace CMS.Core.Constants
+namespace CMS.Core.Constants;
+
+public static class UserType
 {
-    public static class UserType
-    {
-        public static string Other = "Other";
-    }
+    public static string Other = "Other";
 }

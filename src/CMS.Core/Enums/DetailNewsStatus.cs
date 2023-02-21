@@ -1,8 +1,7 @@
-namespace CMS.Core.Enums
+namespace CMS.Core.Enums;
+
+public enum DetailNewsStatus
 {
-    public enum DetailNewsStatus
-    {
-        Publish,
-        Hidden
-    }
+    Publish,
+    Hidden
 }

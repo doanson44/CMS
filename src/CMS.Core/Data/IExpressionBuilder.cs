@@ -1,26 +1,25 @@
 using System;
 using System.Linq.Expressions;
 
-namespace CMS.Core.Data
+namespace CMS.Core.Data;
+
+public interface IExpressionBuilder<T>
 {
-    public interface IExpressionBuilder<T>
-    {
-        Expression<Func<T, bool>> ToExpression();
-    }
+    Expression<Func<T, bool>> ToExpression();
+}
 
-    public class TrueExpression<T> : IExpressionBuilder<T>
+public class TrueExpression<T> : IExpressionBuilder<T>
+{
+    public Expression<Func<T, bool>> ToExpression()
     {
-        public Expression<Func<T, bool>> ToExpression()
-        {
-            return _ => true;
-        }
+        return _ => true;
     }
+}
 
-    public class FalseExpression<T> : IExpressionBuilder<T>
+public class FalseExpression<T> : IExpressionBuilder<T>
+{
+    public Expression<Func<T, bool>> ToExpression()
     {
-        public Expression<Func<T, bool>> ToExpression()
-        {
-            return _ => false;
-        }
+        return _ => false;
     }
 }

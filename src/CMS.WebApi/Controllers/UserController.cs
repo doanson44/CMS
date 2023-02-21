@@ -1,4 +1,9 @@
-﻿using CMS.Core.Authorization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using CMS.Core.Authorization;
 using CMS.Core.Data.Entites;
 using CMS.Core.Services.Interfaces;
 using CMS.WebApi.Configuration;
@@ -10,11 +15,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace CMS.WebApi.Controllers;
 

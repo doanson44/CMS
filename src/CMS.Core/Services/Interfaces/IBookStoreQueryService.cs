@@ -1,9 +1,8 @@
 ﻿using CMS.Core.Domains;
 
-namespace CMS.Core.Services.Interfaces
+namespace CMS.Core.Services.Interfaces;
+
+public interface IBookStoreQueryService
 {
-    public interface IBookStoreQueryService
-    {
-        public BookSPDto GetBookStoreFromStoredProcedure(long bookId);
-    }
+    public BookSPDto GetBookStoreFromStoredProcedure(long bookId);
 }

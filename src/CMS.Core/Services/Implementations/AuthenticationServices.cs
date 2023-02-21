@@ -1,40 +1,39 @@
+using System.Security.Claims;
 using CMS.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
-namespace CMS.Core.Services
+namespace CMS.Core.Services;
+
+public class AuthenticationServices : IAuthenticationServices
 {
-    public class AuthenticationServices : IAuthenticationServices
+    private readonly IHttpContextAccessor _contextAccessor;
+    private string id = string.Empty;
+    private string userName = string.Empty;
+
+    public AuthenticationServices(IHttpContextAccessor contextAccessor)
     {
-        private readonly IHttpContextAccessor contextAccessor;
-        private string id = string.Empty;
-        private string userName = string.Empty;
+        _contextAccessor = contextAccessor;
+    }
 
-        public AuthenticationServices(IHttpContextAccessor contextAccessor)
+    public bool IsAuthenticated => _contextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+
+    public (string id, string userName) GetCurrentUser()
+    {
+        if (!IsAuthenticated)
         {
-            this.contextAccessor = contextAccessor;
+            return (string.Empty, string.Empty);
         }
 
-        public bool IsAuthenticated => contextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
-
-        public (string id, string userName) GetCurrentUser()
+        if (string.IsNullOrWhiteSpace(id))
         {
-            if (!IsAuthenticated)
+            var user = _contextAccessor.HttpContext.User;
+            if (user != null)
             {
-                return (string.Empty, string.Empty);
+                id = user.FindFirst(ClaimTypes.Name).Value;
+                userName = user.FindFirst(ClaimTypes.Name).Value;
             }
-
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                var user = contextAccessor.HttpContext.User;
-                if (user != null)
-                {
-                    id = user.FindFirst(ClaimTypes.Name).Value;
-                    userName = user.FindFirst(ClaimTypes.Name).Value;
-                }
-            }
-
-            return (id, userName);
         }
+
+        return (id, userName);
     }
 }

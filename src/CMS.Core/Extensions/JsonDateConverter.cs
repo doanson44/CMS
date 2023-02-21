@@ -1,12 +1,11 @@
 using Newtonsoft.Json.Converters;
 
-namespace CMS.Core.Extensions
+namespace CMS.Core.Extensions;
+
+public class JsonDateConverter : IsoDateTimeConverter
 {
-    public class JsonDateConverter : IsoDateTimeConverter
+    public JsonDateConverter()
     {
-        public JsonDateConverter()
-        {
-            DateTimeFormat = "dd/MM/yyyy";
-        }
+        DateTimeFormat = "dd/MM/yyyy";
     }
 }

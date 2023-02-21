@@ -1,6 +1,5 @@
-﻿namespace CMS.Infrastructure.Identity
+﻿namespace CMS.Infrastructure.Identity;
+
+public class TodoListContextSeed
 {
-    public class TodoListContextSeed
-    {
-    }
 }

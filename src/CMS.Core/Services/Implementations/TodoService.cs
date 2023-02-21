@@ -1,4 +1,6 @@
-﻿using CMS.Core.Data;
+﻿using System;
+using System.Threading.Tasks;
+using CMS.Core.Data;
 using CMS.Core.Data.Entities.Todo;
 using CMS.Core.Data.Extensions;
 using CMS.Core.Data.Repositories;
@@ -7,96 +9,93 @@ using CMS.Core.Domains.Shared;
 using CMS.Core.Enums;
 using CMS.Core.Exceptions;
 using CMS.Core.Services.Interfaces;
-using System;
-using System.Threading.Tasks;
 
-namespace CMS.Core.Services.Implementations
+namespace CMS.Core.Services.Implementations;
+
+public class TodoService : ITodoService
 {
-    public class TodoService : ITodoService
+    private readonly IRepository<TodoItem> _todoRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public TodoService(IUnitOfWork unitOfWork)
     {
-        private readonly IRepository<TodoItem> todoRepository;
-        private readonly IUnitOfWork unitOfWork;
+        _unitOfWork = unitOfWork;
+        _todoRepository = unitOfWork.Get<TodoItem>();
+    }
 
-        public TodoService(IUnitOfWork unitOfWork)
+    public async Task<PagedList<TodoDto>> GetAllAsync(TodoQueryParam query)
+    {
+        var (page, take, search, sort, asc) = query.Params;
+        var condition = PredicateBuilder.True<TodoItem>();
+
+        if (!string.IsNullOrWhiteSpace(search))
         {
-            this.unitOfWork = unitOfWork;
-            todoRepository = unitOfWork.Get<TodoItem>();
+            condition = condition.And(x => x.Description.Contains(search) || x.Item.Contains(search));
         }
 
-        public async Task<PagedList<TodoDto>> GetAllAsync(TodoQueryParam query)
+        var result = await _todoRepository.GetPagedListAsync(
+            condition,
+            x => new TodoDto(x),
+            o => o.Sort(x => x.Item, true),
+            query.Page,
+            query.Take);
+
+        return result;
+    }
+
+    public async Task CreateAsync(TodoRequest request)
+    {
+        var todo = new TodoItem(request);
+        // Check valid duplicate
+        var isExist = await _todoRepository.IsLiveAsync(x => x.Item == todo.Item);
+        if (isExist)
         {
-            var (page, take, search, sort, asc) = query.Params;
-            var condition = PredicateBuilder.True<TodoItem>();
+            throw new BusinessException(ErrorCodes.TodoExist);
+        }
+        await _todoRepository.AddAsync(todo);
 
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                condition = condition.And(x => x.Description.Contains(search) || x.Item.Contains(search));
-            }
+        await _unitOfWork.SaveChangesAsync();
+    }
 
-            var result = await todoRepository.GetPagedListAsync(
-                condition,
-                x => new TodoDto(x),
-                o => o.Sort(x => x.Item, true),
-                query.Page,
-                query.Take);
+    public async Task DeleteAsync(int id)
+    {
+        var todo = await _todoRepository.GetByIdAsync(id);
 
-            return result;
+        if (todo == null)
+        {
+            throw new BusinessException(ErrorCodes.TodoNotFound);
         }
 
-        public async Task CreateAsync(TodoRequest request)
-        {
-            var todo = new TodoItem(request);
-            // Check valid duplicate
-            var isExist = await todoRepository.IsLiveAsync(x => x.Item == todo.Item);
-            if (isExist)
-            {
-                throw new BusinessException(ErrorCodes.TodoExist);
-            }
-            await todoRepository.AddAsync(todo);
+        _todoRepository.Remove(todo);
 
-            await unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task<TodoDto> GetByIdAsync(int id)
+    {
+        var todo = await _todoRepository.GetByIdAsync(id);
+        if (todo == null)
+        {
+            throw new BusinessException(ErrorCodes.TodoNotFound);
         }
 
-        public async Task DeleteAsync(int id)
+        var TodoDto = new TodoDto(todo);
+        return TodoDto;
+    }
+
+    public async Task UpdateAsync(int id, TodoRequest request)
+    {
+        var todo = await _todoRepository.GetByIdAsync(id);
+        if (todo == null)
         {
-            var todo = await todoRepository.GetByIdAsync(id);
-
-            if (todo == null)
-            {
-                throw new BusinessException(ErrorCodes.TodoNotFound);
-            }
-
-            todoRepository.Remove(todo);
-
-            await unitOfWork.SaveChangesAsync();
+            throw new BusinessException(ErrorCodes.TodoNotFound);
         }
 
-        public async Task<TodoDto> GetByIdAsync(int id)
-        {
-            var todo = await todoRepository.GetByIdAsync(id);
-            if (todo == null)
-            {
-                throw new BusinessException(ErrorCodes.TodoNotFound);
-            }
+        todo.Item = request.Item;
+        todo.Description = request.Description;
+        todo.Minutes = request.Minutes;
 
-            var TodoDto = new TodoDto(todo);
-            return TodoDto;
-        }
-
-        public async Task UpdateAsync(int id, TodoRequest request)
-        {
-            var todo = await todoRepository.GetByIdAsync(id);
-            if (todo == null)
-            {
-                throw new BusinessException(ErrorCodes.TodoNotFound);
-            }
-
-            todo.Item = request.Item;
-            todo.Description = request.Description;
-            todo.Minutes = request.Minutes;
-
-            todoRepository.Update(todo);
-            await unitOfWork.SaveChangesAsync();
-        }
+        _todoRepository.Update(todo);
+        await _unitOfWork.SaveChangesAsync();
     }
 }

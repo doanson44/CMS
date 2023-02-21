@@ -1,9 +1,8 @@
-namespace CMS.Core.Enums
+namespace CMS.Core.Enums;
+
+public enum StatusType
 {
-    public enum StatusType
-    {
-        None,
-        Failed, // tre tien do
-        Passed  // dung tien do
-    }
+    None,
+    Failed, // tre tien do
+    Passed  // dung tien do
 }

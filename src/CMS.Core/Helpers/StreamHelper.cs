@@ -1,58 +1,57 @@
 using System;
 
-namespace CMS.Core.Helpers
+namespace CMS.Core.Helpers;
+
+public static class StreamHelper
 {
-    public static class StreamHelper
+    public static byte[] ReadToEnd(System.IO.Stream stream)
     {
-        public static byte[] ReadToEnd(System.IO.Stream stream)
+        long originalPosition = 0;
+
+        if (stream.CanSeek)
         {
-            long originalPosition = 0;
+            originalPosition = stream.Position;
+            stream.Position = 0;
+        }
 
-            if (stream.CanSeek)
+        try
+        {
+            var readBuffer = new byte[4096];
+
+            var totalBytesRead = 0;
+            int bytesRead;
+
+            while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
             {
-                originalPosition = stream.Position;
-                stream.Position = 0;
-            }
+                totalBytesRead += bytesRead;
 
-            try
-            {
-                byte[] readBuffer = new byte[4096];
-
-                int totalBytesRead = 0;
-                int bytesRead;
-
-                while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
+                if (totalBytesRead == readBuffer.Length)
                 {
-                    totalBytesRead += bytesRead;
-
-                    if (totalBytesRead == readBuffer.Length)
+                    var nextByte = stream.ReadByte();
+                    if (nextByte != -1)
                     {
-                        int nextByte = stream.ReadByte();
-                        if (nextByte != -1)
-                        {
-                            byte[] temp = new byte[readBuffer.Length * 2];
-                            Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
-                            Buffer.SetByte(temp, totalBytesRead, (byte)nextByte);
-                            readBuffer = temp;
-                            totalBytesRead++;
-                        }
+                        var temp = new byte[readBuffer.Length * 2];
+                        Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
+                        Buffer.SetByte(temp, totalBytesRead, (byte)nextByte);
+                        readBuffer = temp;
+                        totalBytesRead++;
                     }
                 }
-
-                byte[] buffer = readBuffer;
-                if (readBuffer.Length != totalBytesRead)
-                {
-                    buffer = new byte[totalBytesRead];
-                    Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
-                }
-                return buffer;
             }
-            finally
+
+            var buffer = readBuffer;
+            if (readBuffer.Length != totalBytesRead)
             {
-                if (stream.CanSeek)
-                {
-                    stream.Position = originalPosition;
-                }
+                buffer = new byte[totalBytesRead];
+                Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
+            }
+            return buffer;
+        }
+        finally
+        {
+            if (stream.CanSeek)
+            {
+                stream.Position = originalPosition;
             }
         }
     }

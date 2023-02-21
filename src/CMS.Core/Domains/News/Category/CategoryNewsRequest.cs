@@ -1,9 +1,8 @@
-namespace CMS.Core.Domains
-{
-    public class CategoryNewsRequest
-    {
-        public int? Id { get; set; }
+namespace CMS.Core.Domains;
 
-        public string Name { get; set; }
-    }
+public class CategoryNewsRequest
+{
+    public int? Id { get; set; }
+
+    public string Name { get; set; }
 }

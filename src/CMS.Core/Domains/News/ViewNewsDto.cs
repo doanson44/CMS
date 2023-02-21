@@ -1,17 +1,16 @@
 using CMS.Core.Data.Entities;
 
-namespace CMS.Core.Domains
+namespace CMS.Core.Domains;
+
+public class ViewNewsDto
 {
-    public class ViewNewsDto
+    public long Id { get; set; }
+
+    public int Count { get; set; }
+
+    public ViewNewsDto(ViewNews e)
     {
-        public long Id { get; set; }
-
-        public int Count { get; set; }
-
-        public ViewNewsDto(ViewNews e)
-        {
-            Id = e.Id;
-            Count = e.Count;
-        }
+        Id = e.Id;
+        Count = e.Count;
     }
 }
