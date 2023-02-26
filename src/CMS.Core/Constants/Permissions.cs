@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CMS.Core.Data.Entities;
 
 namespace CMS.Core.Constants;
 
@@ -32,8 +31,8 @@ public static class Security
         public const string DeleteAsync = "Permissions.CategoryNews.DeleteAsync";
     }
 
-    public static List<string> AllPermissions = new List<string> 
-    { 
+    public static List<string> AllPermissions = new List<string>
+    {
         TodoPermission.GetAllAsync,
         TodoPermission.GetByIdAsync,
         TodoPermission.CreateAsync,
