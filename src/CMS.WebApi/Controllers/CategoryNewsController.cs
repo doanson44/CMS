@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using CMS.Core.Constants;
 using CMS.Core.Domains;
 using CMS.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ namespace CMS.WebApi.Controllers;
 
 [Route("cms/categorynews")]
 [ApiController]
-[Authorize]
+[Authorize(Roles = RoleConstants.PermisstionType.Supervisor)]
 public class CategoryNewsController : BaseApiController
 {
     private readonly ICategoryNewsService _categoryNewsService;
@@ -34,6 +35,7 @@ public class CategoryNewsController : BaseApiController
     }
 
     [HttpPost]
+    [Authorize(Security.CategoryNewsPermission.CreateAsync)]
     public async Task<IActionResult> CreateAsync(CategoryNewsRequest request)
     {
         await _categoryNewsService.CreateAsync(request);

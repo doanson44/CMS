@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CMS.Core.Constants;
 using CMS.WebApi.Helpers;
 using CMS.WebApi.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace CMS.WebApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = RoleConstants.PermisstionType.Administrators)]
 public class PermissionController : BaseApiController
 {
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -25,7 +27,7 @@ public class PermissionController : BaseApiController
     {
         var model = new PermissionViewModel();
         var allPermissions = new List<RoleClaimsViewModel>();
-        allPermissions.GetPermissions(typeof(Permissions.TodoModule), roleName);
+        allPermissions.GetPermissions(Security.AllPermissions, roleName);
         var role = await _roleManager.FindByNameAsync(roleName);
         model.RoleName = roleName;
         var claims = await _roleManager.GetClaimsAsync(role);

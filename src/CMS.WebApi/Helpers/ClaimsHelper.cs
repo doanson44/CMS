@@ -21,6 +21,14 @@ public static class ClaimsHelper
         }
     }
 
+    public static void GetPermissions(this List<RoleClaimsViewModel> allPermissions, List<string> permissions, string roleName)
+    {
+        foreach (var fi in permissions)
+        {
+            allPermissions.Add(new RoleClaimsViewModel { Value = fi, Type = "Permissions" });
+        }
+    }
+
     public static async Task AddPermissionClaim(this RoleManager<IdentityRole> roleManager, IdentityRole role, string permission)
     {
         var allClaims = await roleManager.GetClaimsAsync(role);

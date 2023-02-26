@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.Core.Constants;
+using CMS.Core.Data.Entites;
 using CMS.WebApi.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -9,14 +10,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.WebApi.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
 [Authorize(Roles = RoleConstants.PermisstionType.Administrators)]
-public class UserRolesController : Controller
+public class UserRolesController : BaseApiController
 {
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public UserRolesController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, RoleManager<IdentityRole> roleManager)
+    public UserRolesController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -53,7 +56,7 @@ public class UserRolesController : Controller
         return Ok(model);
     }
 
-    [HttpPut("username")]
+    [HttpPut("{username}")]
     public async Task<IActionResult> Update([FromRoute] string username, ManageUserRolesViewModel model)
     {
         var user = await _userManager.FindByNameAsync(username);

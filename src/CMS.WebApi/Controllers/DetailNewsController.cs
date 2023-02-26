@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using CMS.Core.Constants;
 using CMS.Core.Domains;
 using CMS.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ namespace CMS.WebApi.Controllers;
 
 [Route("cms/detailnews")]
 [ApiController]
-[Authorize]
+[Authorize(Roles = RoleConstants.PermisstionType.Supervisor)]
 public class DetailNewsController : BaseApiController
 {
     private readonly IDetailNewsService _detailNewsService;

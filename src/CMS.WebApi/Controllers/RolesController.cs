@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CMS.WebApi.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
 [Authorize(Roles = RoleConstants.PermisstionType.Administrators)]
 public class RolesController : BaseApiController
 {

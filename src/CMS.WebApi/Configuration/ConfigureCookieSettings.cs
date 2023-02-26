@@ -7,7 +7,7 @@ namespace CMS.WebApi.Configuration;
 
 public static class ConfigureCookieSettings
 {
-    public const int ValidityMinutesPeriod = 1;
+    public const int ValidityMinutesPeriod = 30;
     public const string IdentifierCookieName = "EshopIdentifier";
 
     public static IServiceCollection AddCookieSettings(this IServiceCollection services)

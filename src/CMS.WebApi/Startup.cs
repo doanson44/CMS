@@ -154,7 +154,6 @@ public class Startup
         app.UseErrorLogging();
 
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
 
         // enable swagger
         app.UseSwagger(c =>
