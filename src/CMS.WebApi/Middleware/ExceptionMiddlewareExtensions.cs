@@ -1,17 +1,18 @@
-using System;
+﻿using System;
 using CMS.Core.Enums;
 using CMS.Core.Exceptions;
 using CMS.WebApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace CMS.WebApi.Middleware;
 
 public static class ExceptionMiddlewareExtensions
 {
-    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder app, ILoggerFactory loggerFactory)
+    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder app)
     {
         app.UseExceptionHandler(errorApp =>
         {
@@ -21,7 +22,7 @@ public static class ExceptionMiddlewareExtensions
                 context.Response.ContentType = "application/json";
 
                 var error = context.Features.Get<IExceptionHandlerFeature>();
-                var logger = loggerFactory.CreateLogger("BusinessException");
+                var logger = context.RequestServices.GetService<ILogger<BusinessException>>();
                 if (error != null)
                 {
                     var ex = error.Error;
