@@ -28,16 +28,13 @@ public class Startup
     public const string CORS_POLICY = "CorsPolicy";
     public IConfiguration Configuration { get; }
     private readonly IWebHostEnvironment hostingEnvironment;
-    private readonly ILoggerFactory loggerFactory;
 
     public Startup(
         IConfiguration configuration,
-        IWebHostEnvironment hostingEnvironment,
-        ILoggerFactory loggerFactory)
+        IWebHostEnvironment hostingEnvironment)
     {
         Configuration = configuration;
         this.hostingEnvironment = hostingEnvironment;
-        this.loggerFactory = loggerFactory;
     }
 
     // This method gets called by the runtime. Use this method to add services to the container.
@@ -56,11 +53,6 @@ public class Startup
         {
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
                 x => x.UseNetTopologySuite());
-
-            if (hostingEnvironment.IsProduction())
-            {
-                options.UseLoggerFactory(loggerFactory);
-            }
         });
 
         services.Configure<MultipleDatabaseSettings>(Configuration.GetSection(nameof(MultipleDatabaseSettings)));
@@ -150,7 +142,8 @@ public class Startup
         {
             app.UseHsts();
         }
-        app.UseErrorHandler(loggerFactory);
+
+        app.UseErrorHandler();
         app.UseErrorLogging();
 
         app.UseHttpsRedirection();
