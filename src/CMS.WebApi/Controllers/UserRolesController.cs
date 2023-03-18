@@ -67,4 +67,20 @@ public class UserRolesController : BaseApiController
         await _signInManager.RefreshSignInAsync(currentUser);
         return Ok();
     }
+
+    [HttpPost("copy-roles")]
+    public async Task<IActionResult> CopyRoles(CopyRolesViewModel model)
+    {
+        var fromUser = await _userManager.FindByNameAsync(model.CopyFromUser);
+        var fromUserRoles = await _userManager.GetRolesAsync(fromUser);
+
+        var toUser = await _userManager.FindByNameAsync(model.CopyToUser);
+        var toUserRoles = await _userManager.GetRolesAsync(toUser);
+
+        var result = await _userManager.RemoveFromRolesAsync(toUser, toUserRoles);
+        result = await _userManager.AddToRolesAsync(toUser, fromUserRoles);
+        var currentUser = await _userManager.GetUserAsync(User);
+        await _signInManager.RefreshSignInAsync(currentUser);
+        return Ok();
+    }
 }
