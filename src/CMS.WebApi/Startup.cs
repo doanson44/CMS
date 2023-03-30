@@ -5,9 +5,11 @@ using CMS.Core.Constants;
 using CMS.Core.Data.Entites;
 using CMS.Core.Settings;
 using CMS.Infrastructure.Data;
+using CMS.WebApi.AuthEndpoints;
 using CMS.WebApi.Configuration;
 using CMS.WebApi.Middleware;
 using CMS.WebApi.Permission;
+using CMS.WebApi.SlackNotification;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -41,10 +43,13 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddHttpContextAccessor();
+        services.AddHttpClient();
 
         // mail
         services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+        services.Configure<SlackNotificationSettings>(Configuration.GetSection(nameof(SlackNotificationSettings)));
 
+        services.AddSingleton<ISlackClient, SlackClient>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
@@ -143,7 +148,7 @@ public class Startup
             app.UseHsts();
         }
 
-        app.UseErrorHandler();
+        app.UseErrorHandler(Configuration);
         app.UseErrorLogging();
 
         app.UseHttpsRedirection();
