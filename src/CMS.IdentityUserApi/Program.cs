@@ -1,8 +1,6 @@
 ﻿using CMS.IdentityUserLib;
 using CMS.IdentityUserLib.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddTransient<ITokenClaimsService, IdentityTokenClaimService>();
 Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 var app = builder.Build();
 
@@ -45,5 +45,9 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.Run();
