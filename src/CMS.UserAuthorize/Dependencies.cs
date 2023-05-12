@@ -21,6 +21,7 @@ public static class Dependencies
     {
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<ITokenClaimsService, IdentityTokenClaimService>();
 
         services.AddDbContext<AppIdentityDbContext>(options =>
         {
@@ -82,7 +83,7 @@ public static class Dependencies
         services.AddAuthorization();
     }
 
-    public static IApplicationBuilder UseAuthorizeServices(this IApplicationBuilder app)
+    public static IApplicationBuilder UseAuthorizeLib(this IApplicationBuilder app)
     {
         // enable swagger
         app.UseSwagger(c =>
