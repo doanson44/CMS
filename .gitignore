@@ -259,3 +259,4 @@ pub/
 .eshopdocker_*
 *.jfm
 /src/CMS.WebApi/NTTLogs/2023/02
+/src/CMS.WebApi/NTTLogs/2023/03
